@@ -4,13 +4,8 @@ C_STANDARD=c17
 
 OBJECTS=\
 	$(OUTDIR)/main.o \
-	$(OUTDIR)/io.o \
-	$(OUTDIR)/env.o \
-	$(OUTDIR)/grep.o \
-	$(OUTDIR)/add.o \
-	$(OUTDIR)/delete.o \
-	$(OUTDIR)/edit.o \
-	$(OUTDIR)/view.o
+	$(OUTDIR)/operations.o \
+	$(OUTDIR)/io.o
 
 
 $(OUTDIR)/%.o: src/%.c

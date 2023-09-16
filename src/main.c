@@ -1,19 +1,9 @@
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "defs.h"
-#include "view.h"
-#include "add.h"
-#include "delete.h"
-#include "grep.h"
-#include "env.h"
+#include <string.h>
 
-	static void
-error_msg(char* msg)
-{
-	fprintf(stderr, "%s", msg);
-	exit(1);
-}
+#include "main.h"
+#include "operations.h"
 
 int main(int argc, char **argv)
 {
@@ -61,3 +51,23 @@ int main(int argc, char **argv)
 		delete(ctx,argv[2]);
 	}
 }
+
+static void
+error_msg(char* msg)
+{
+	fprintf(stderr, "%s", msg);
+	exit(1);
+}
+
+static char* 
+getenv_with_error(char* env_key)
+{
+	char* env_value = getenv(env_key);
+	if(env_value == NULL) {
+		fprintf(stderr, "Please set environment variable $%s.\n", env_key);
+		exit(1);
+	}
+
+	return env_value;
+}
+
