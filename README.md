@@ -1,7 +1,7 @@
 # zettelkasten-c
-This is yet another implementation of my knowledge system. 
+This is yet another implementation of my knowledge management system. 
 
-Tested only on Mac OS, but the code should be portable to other unix like OSes.
+Tested only on Mac OS. Code should be portable to other Unix-like Operative Systems.
 
-# Nice to haves
+## Nice to haves
 - Compile against musl instead of glibc.
