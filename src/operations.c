@@ -3,6 +3,8 @@
 #include<unistd.h>
 #include<time.h>
 #include<limits.h>
+#include<string.h>
+#include<ftw.h>
 #include"operations.h"
 #include"io.h"
 
@@ -25,14 +27,16 @@ add(struct context ctx)
 	execlp(ctx.editor, ctx.editor, "-c", vim_cmds, filepath, NULL);
 }
 
-void delete(struct context ctx, char *id)
+void
+delete(struct context ctx, char *id)
 {
 	char filepath[PATH_MAX];
 	sprintf(filepath, "%s/%c%c/%s.md", ctx.zet_dir, id[0], id[1], id);
 	remove(filepath);
 }
 
-void edit(struct context ctx, char *id)
+void
+edit(struct context ctx, char *id)
 {
 	char filepath[PATH_MAX];
 	sprintf(filepath, "%s/%c%c/%s.md", ctx.zet_dir, id[0], id[1], id);
@@ -44,11 +48,13 @@ void
 view(struct context ctx, char *id)
 {
 	char filepath[PATH_MAX];
-	sprintf(filepath,
-			"%s/%c%c/%s.md", ctx.zet_dir, id[0], id[1], id);
+	sprintf(filepath, "%s/%c%c/%s.md", ctx.zet_dir, id[0], id[1], id);
 	file_to_stdout(filepath);
 }
 
+/*
+ * It would be better to run grep on individual files (and avoid non-portable -R
+ * flag). */
 void
 grep(struct context ctx, char *regexp)
 {
@@ -72,28 +78,44 @@ grep(struct context ctx, char *regexp)
 	fclose(grep_results);
 }
 
-/* TODO: ls performs fairly well, yet it is not ordered.
- * Use fts(3) to transverse filesystem.  */
-void
-ls(struct context ctx)
+int
+sort_function(const void *a,const void *b) {
+	/* The actual arguments to this function are "pointers to
+	   pointers to char", but strcmp(3) arguments are "pointers
+	   to char", hence the following cast plus dereference */
+
+	return strcmp(* (char * const *) a , * (char * const *) b);
+}
+
+
+char *results[PATH_MAX];
+int results_idx=0;
+
+static int
+display_info(const char *fpath, const struct stat *sb, 
+		int tflag, struct FTW *ftwbuf)
 {
-	/* -E extended regexp
-	 * -R recursive
-	 * -l only filenames */
-	char argument_list[1024];
-	snprintf(argument_list, sizeof(argument_list), "%s %s", "grep -ERl .",
-			ctx.zet_dir );
-
-
-	FILE *grep_results = popen(argument_list, "r");
-	char *grep_result_line = NULL;
-	size_t ln = 0;
-	ssize_t n;
-	while ((n = getline(&grep_result_line, &ln, grep_results)) != -1) {
-		grep_result_line[n-1]='\0';
-		first_line_in_file_to_stdout(grep_result_line);
+	if(tflag != FTW_F){
+		/* We only care about regular files. Filter out directories, 
+		 * symlinks, blocks, sockets, etc  */
+		return 0;
 	}
-	free(grep_result_line);
-	fclose(grep_results);
+	results[results_idx] = malloc(PATH_MAX * sizeof(char));
+	strcpy(results[results_idx], fpath);
+	results_idx++;
+
+	return 0;  /* tell nftw() to continue */
+}
+
+void 
+ls(struct context ctx) {
+	nftw(ctx.zet_dir, display_info, 16, 0);
+
+	qsort(results, results_idx, sizeof(char*), sort_function);
+
+	for(int i=0; i<results_idx; i++){
+		first_line_in_file_to_stdout(results[i]) ;
+		free(results[i]);
+	}
 }
 
