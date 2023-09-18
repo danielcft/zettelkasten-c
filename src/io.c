@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#define RULER_SIZE 72
+#define RULER_SIZE 80
 
 static FILE*
 open_file(char *filepath)

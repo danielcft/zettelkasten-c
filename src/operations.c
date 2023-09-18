@@ -5,6 +5,8 @@
 #include<limits.h>
 #include<string.h>
 #include<ftw.h>
+#include<sys/wait.h>
+
 #include"operations.h"
 #include"io.h"
 
@@ -31,7 +33,6 @@ void init_env(){
 	env.editor= getenv_with_error("EDITOR");
 }
 
-
 void
 add()
 {
@@ -48,7 +49,7 @@ add()
 	char vim_cmds[255];
 	sprintf(vim_cmds, "put='# %s TITLE ' | put='' | put='tags: #' | 1 ", id);
 
-	execlp(env.editor, env.editor, "-c", vim_cmds, filepath, NULL);
+	execlp(env.editor, env.editor, "-c", vim_cmds, filepath, (char *) NULL);
 }
 
 void
@@ -65,7 +66,7 @@ edit(char *id)
 	char filepath[PATH_MAX];
 	sprintf(filepath, "%s/%c%c/%s.md", env.zet_dir, id[0], id[1], id);
 
-	execlp(env.editor, env.editor, filepath, NULL);
+	execlp(env.editor, env.editor, filepath, (char *) NULL);
 }
 
 void
@@ -74,32 +75,6 @@ view(char *id)
 	char filepath[PATH_MAX];
 	sprintf(filepath, "%s/%c%c/%s.md", env.zet_dir, id[0], id[1], id);
 	file_to_stdout(filepath);
-}
-
-/*
- * It would be better to run grep on individual files (and avoid non-portable -R
- * flag). */
-void
-grep(char *regexp)
-{
-	char argument_list[1024];
-	/*  -E extended regexp
-	 *  -R recursive
-	 *  -l only filenames */
-	snprintf(argument_list, sizeof(argument_list), "%s %s %s", "grep -ERl",
-			regexp, env.zet_dir );
-
-	FILE *grep_results = popen(argument_list, "r");
-	char *line = NULL;
-	size_t ln = 0;
-	size_t n =0;
-	while ((n = getline(&line, &ln, grep_results)) != -1) {
-		line[n-1]='\0';
-		file_to_stdout(line);
-		ruler();
-	}
-	free(line);
-	fclose(grep_results);
 }
 
 int
@@ -136,6 +111,36 @@ ls() {
 	for(int i=0; i<results_idx; i++){
 		first_line_in_file_to_stdout(results[i]) ;
 		free(results[i]);
+	}
+}
+
+void 
+grep(char *regexp) {
+	nftw(env.zet_dir, display_info, 16, 0);
+
+	/* TODO is it really needed to sort the results? */
+	qsort(results, results_idx, sizeof(char*), sort_function);
+
+
+	int statval, pid;
+	for(int i=0; i<results_idx; i++){
+		/*
+		 * run grep on a child process
+		 * wait for grep to finish
+		 * print file if grep found a match, ie statuscode != 0
+		 */
+		pid = fork();
+		if(pid == 0) {
+			execlp("grep", "grep",  "-Eq", regexp, results[i], 
+					(char *) NULL);
+		}
+		else {
+			waitpid( pid, &statval, 0);
+			if(WIFEXITED(statval) && !WEXITSTATUS(statval)){
+				ruler();
+				file_to_stdout(results[i]);
+			}
+		}
 	}
 }
 
