@@ -5,7 +5,8 @@
 #include "main.h"
 #include "operations.h"
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
 	init_env();
 	if (argc <= 1) {

@@ -28,7 +28,8 @@ getenv_with_error(const char *env_key)
 	return env_value;
 }
 
-void init_env(){
+void 
+init_env(){
 	env.zet_dir=getenv_with_error("ZET_DIR");
 	env.editor= getenv_with_error("EDITOR");
 }
