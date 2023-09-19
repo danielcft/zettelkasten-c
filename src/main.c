@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 }
 
 static void
-error_msg(char* msg)
+error_msg(const char* msg)
 {
 	fprintf(stderr, "%s", msg);
 	exit(1);

@@ -12,12 +12,12 @@
 
 
 static char *results[PATH_MAX];
-static int results_idx=0;
+static size_t results_idx=0;
 static struct environment env;
-static char *getenv_with_error(char * env_key);
+static char *getenv_with_error(const char * env_key);
 
 static char* 
-getenv_with_error(char* env_key)
+getenv_with_error(const char *env_key)
 {
 	char* env_value = getenv(env_key);
 	if(env_value == NULL) {
@@ -53,7 +53,7 @@ add()
 }
 
 void
-delete(char *id)
+delete(const char *id)
 {
 	char filepath[PATH_MAX];
 	sprintf(filepath, "%s/%c%c/%s.md", env.zet_dir, id[0], id[1], id);
@@ -61,7 +61,7 @@ delete(char *id)
 }
 
 void
-edit(char *id)
+edit(const char *id)
 {
 	char filepath[PATH_MAX];
 	sprintf(filepath, "%s/%c%c/%s.md", env.zet_dir, id[0], id[1], id);
@@ -70,7 +70,7 @@ edit(char *id)
 }
 
 void
-view(char *id)
+view(const char *id)
 {
 	char filepath[PATH_MAX];
 	sprintf(filepath, "%s/%c%c/%s.md", env.zet_dir, id[0], id[1], id);
@@ -95,7 +95,7 @@ display_info(const char *fpath, const struct stat *sb,
 		 * symlinks, blocks, sockets, etc  */
 		return 0;
 	}
-	results[results_idx] = malloc(PATH_MAX * sizeof(char));
+	results[results_idx] = calloc(PATH_MAX, sizeof(char));
 	strcpy(results[results_idx], fpath);
 	results_idx++;
 
@@ -108,14 +108,14 @@ ls() {
 
 	qsort(results, results_idx, sizeof(char*), sort_function);
 
-	for(int i=0; i<results_idx; i++){
+	for(size_t i=0; i<results_idx; i++){
 		first_line_in_file_to_stdout(results[i]) ;
 		free(results[i]);
 	}
 }
 
 void 
-grep(char *regexp) {
+grep(const char *regexp) {
 	nftw(env.zet_dir, display_info, 16, 0);
 
 	/* TODO is it really needed to sort the results? */
@@ -123,7 +123,7 @@ grep(char *regexp) {
 
 
 	int statval, pid;
-	for(int i=0; i<results_idx; i++){
+	for(size_t i=0; i<results_idx; i++){
 		/*
 		 * run grep on a child process
 		 * wait for grep to finish
@@ -139,6 +139,7 @@ grep(char *regexp) {
 			if(WIFEXITED(statval) && !WEXITSTATUS(statval)){
 				ruler();
 				file_to_stdout(results[i]);
+				free(results[i]);
 			}
 		}
 	}

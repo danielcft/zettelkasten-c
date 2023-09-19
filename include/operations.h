@@ -5,13 +5,13 @@ struct environment {
 };
 
 /* populate environment variables in environment struct */
-void init_env();
+void init_env(void);
 
 /* all these calls assume init_env() being invoked at least once */
-void add();
-void delete(char *id);
-void edit(char *id);
-void grep(char *regexp);
-void ls();
-void view(char *id);
+void add(void);
+void delete(const char *id);
+void edit(const char *id);
+void grep(const char *regexp);
+void ls(void);
+void view(const char *id);
 

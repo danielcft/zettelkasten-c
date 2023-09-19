@@ -1,1 +1,1 @@
-static void error_msg(char *msg);
+static void error_msg(const char *msg);

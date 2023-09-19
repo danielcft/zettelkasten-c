@@ -4,7 +4,7 @@
 #define RULER_SIZE 80
 
 static FILE*
-open_file(char *filepath)
+open_file(const char *filepath)
 {
 	FILE *fptr;
 
@@ -27,7 +27,7 @@ close_file(FILE *fptr)
 
 
 void
-file_to_stdout(char *filepath)
+file_to_stdout(const char *filepath)
 {
 	FILE *fptr = open_file(filepath);
 
@@ -42,7 +42,7 @@ file_to_stdout(char *filepath)
 }
 
 void
-first_line_in_file_to_stdout(char *filepath)
+first_line_in_file_to_stdout(const char *filepath)
 {
 	FILE *fptr = open_file(filepath);
 
