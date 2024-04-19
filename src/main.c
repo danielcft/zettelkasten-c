@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "main.h"
 #include "operations.h"
@@ -16,6 +17,18 @@ main(int argc, char **argv)
 				" add, view, edit, delete, grep, list "
 				"}\n");
 	}
+
+
+	// change to $ZET_DIR to allow 'gf' in vim to work.
+        const char *dir = getenv("ZET_DIR");
+        if (dir == NULL) {
+            fprintf(stderr, "Error: $ZET_DIR not set.\n");
+            return EXIT_FAILURE;
+        }
+        if (chdir(dir) != 0) {
+          perror("Could not chdir to $ZET_DIR");
+          return EXIT_FAILURE;
+        }
 
 	if(!strcmp(argv[1], "add") || !strcmp(argv[1],"a")){
 		add();
