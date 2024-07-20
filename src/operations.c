@@ -119,7 +119,6 @@ void
 grep(const char *regexp) {
 	nftw(env.zet_dir, display_info, 16, 0);
 
-	/* TODO is it really needed to sort the results? */
 	qsort(results, results_idx, sizeof(char*), sort_function);
 
 

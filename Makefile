@@ -1,6 +1,6 @@
 OUTDIR=.build
 INCLUDE+=-Iinclude
-C_STANDARD=c17
+C_STANDARD=c99
 
 OBJECTS=\
 	$(OUTDIR)/main.o \
