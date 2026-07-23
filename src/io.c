@@ -58,7 +58,7 @@ first_line_in_file_to_stdout(const char *filepath)
 }
 
 void 
-ruler()
+ruler(void)
 {
 	for (size_t i=0; i<RULER_SIZE; i++){
 		putchar('=');

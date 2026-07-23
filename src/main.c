@@ -6,16 +6,17 @@
 #include "main.h"
 #include "operations.h"
 
+static const char usage[] =
+    "usage: zettelkasten operation\n\n"
+        "operation = { add, view, edit, delete, grep, list }\n";
+
 int
 main(int argc, char **argv)
 {
 	init_env();
 	if (argc <= 1) {
-		error_msg(
-				"usage: zettelkasten operation\n\n"
-				"operation = {"
-				" add, view, edit, delete, grep, list "
-				"}\n");
+		error_msg(usage);
+		return 1;
 	}
 
 
@@ -39,7 +40,7 @@ main(int argc, char **argv)
 		}
 		grep(argv[2]);
 	}
-	else if(!strcmp(argv[1], "ls")) {
+	else if(!strcmp(argv[1], "list") || !strcmp(argv[1], "ls") ) {
 		ls();
 	}
 	else if(!strcmp(argv[1], "view") || !strcmp(argv[1], "v")) {
@@ -61,6 +62,11 @@ main(int argc, char **argv)
 		}
 		delete(argv[2]);
 	}
+	else {
+		error_msg(usage);
+	}
+
+	return 0;
 }
 
 static void

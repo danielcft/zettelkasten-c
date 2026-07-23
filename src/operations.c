@@ -29,13 +29,13 @@ getenv_with_error(const char *env_key)
 }
 
 void 
-init_env(){
+init_env(void){
 	env.zet_dir=getenv_with_error("ZET_DIR");
 	env.editor= getenv_with_error("EDITOR");
 }
 
 void
-add()
+add(void)
 {
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
@@ -104,7 +104,7 @@ display_info(const char *fpath, const struct stat *sb,
 }
 
 void 
-ls() {
+ls(void) {
 	nftw(env.zet_dir, display_info, 16, 0);
 
 	qsort(results, results_idx, sizeof(char*), sort_function);
@@ -131,16 +131,23 @@ grep(const char *regexp) {
 		 */
 		pid = fork();
 		if(pid == 0) {
+		       /*
+			* Replace child process with grep.
+			*/
 			execlp("grep", "grep",  "-Eq", regexp, results[i], 
 					(char *) NULL);
+		       /* If grep fails, the child will keep executing.
+			* In that case we need to explicitly call exit.
+			*/
+			_exit(127);
 		}
 		else {
 			waitpid( pid, &statval, 0);
 			if(WIFEXITED(statval) && !WEXITSTATUS(statval)){
 				ruler();
 				file_to_stdout(results[i]);
-				free(results[i]);
 			}
+			free(results[i]);
 		}
 	}
 }
